@@ -3,3 +3,9 @@ services:
     class: Drupal\legacy_redirect\Middleware\Redirect
     tags:
       - { name: http_middleware }
+
+
+  legacy_redirect.route_subscriber:
+    class: Drupal\legacy_redirect\Routing\RouteSubscriber
+    tags:
+      - { name: event_subscriber }

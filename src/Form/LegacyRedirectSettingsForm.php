@@ -38,21 +38,23 @@ class LegacyRedirectSettingsForm extends ConfigFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $config = $this->config(static::SETTINGS);
-    $default = $config->get('pid_reference');
-    if (!$default) {
-      $default = 'field_pid';
-    }
+    $message = $this->t("You have arrived here using a URL from our old site. Please update your bookmarks.");
     $form['pid_reference'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Pid Reference Field'),
-      '#default_value' => $default,
+      '#default_value' => $config->get('pid_reference') ? $config->get('pid_reference') : 'field_pid',
     ];
-    $form['namespaces'] = [
-      '#type' => 'textarea',
-      '#title' => $this->t('Allowed namespaces'),
-      '#default_value' => $config->get('namespaces'),
+    $form['redirect_message'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Redirect message'),
+      '#default_value' => $config->get('redirect_message') ? $config->get('redirect_message') : $message,
     ];
 
+    $form['not_found'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Page not found URL'),
+      '#default_value' => $config->get('not_found') ? $config->get('not_found') : '/',
+    ];
     return parent::buildForm($form, $form_state);
   }
 
@@ -60,15 +62,11 @@ class LegacyRedirectSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    // Retrieve the configuration.
     $this->config(static::SETTINGS)
-      // Set the submitted configuration setting.
       ->set('pid_reference', $form_state->getValue('pid_reference'))
-      // You can set multiple configurations at once by making
-      // multiple calls to set().
-      ->set('other_things', $form_state->getValue('other_things'))
+      ->set('redirect_message', $form_state->getValue('redirect_message'))
+      ->set('not_found', $form_state->getValue('not_found'))
       ->save();
-
     parent::submitForm($form, $form_state);
   }
 
