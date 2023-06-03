@@ -52,8 +52,7 @@ class RedirectController extends ControllerBase {
     $pid_field = $config->get('pid_reference');
     $destination = $config->get('not_found') ? $config->get('not_found') : '/';
     $uri = $this->requestStack->getMasterRequest()->getRequestUri();
-    $message = $this->t("The page you are looking for - $uri - does not exist on this site");
-    $status = 404;
+    $message = $this->t("The page you were looking for: $uri does not exist on this site");
 
     if (strpos($uri, "islandora/object/") !== false) {
       $parts = \explode("islandora/object/", $uri);
@@ -66,12 +65,11 @@ class RedirectController extends ControllerBase {
           $node = \reset($nodes);
           $destination = "/node/{$node->id()}";
           $message = $config->get('redirect_message');
-          $status = 302;
         }
       }
     }
     $this->messenger->addMessage($message);
-    $response = new RedirectResponse($destination, $status);
+    $response = new RedirectResponse($destination, 302);
     \Drupal::service('http_middleware.legacy_redirect_redirect')->setRedirectResponse($response);
     return;
   }

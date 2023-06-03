@@ -16,7 +16,7 @@ function legacy_redirect_help($route_name, RouteMatchInterface $route_match) {
     case 'help.page.legacy_redirect':
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('Agile Customizations') . '</p>';
+      $output .= '<p>' . t('Redirects Islandora legacy URLs') . '</p>';
       return $output;
 
     default:
