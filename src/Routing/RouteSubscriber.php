@@ -15,7 +15,6 @@ class RouteSubscriber extends RouteSubscriberBase {
    */
   public function alterRoutes(RouteCollection $collection) {
     // Override "system.404".
-    dvm($collection->get('system.404'));
     if ($route = $collection->get('system.404')) {
       $route->setDefaults([
         '_controller' => 'Drupal\legacy_redirect\Controller\RedirectController::legacyRedirect',
