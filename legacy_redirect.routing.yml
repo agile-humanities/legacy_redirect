@@ -1,0 +1,14 @@
+legacy_redirect.redirect_controller_redirect:
+  path: '/legacy_redirect/redirect'
+  defaults:
+    _controller: '\Drupal\legacy_redirect\Controller\RedirectController::reklRedirect'
+    _title: 'ReklRedirect'
+  requirements:
+    _permission: 'access content'
+system.legacy_redirect.settings:
+  path: '/admin/config/legacy_redirect/settings'
+  defaults:
+    _form: '\Drupal\legacy_redirect\Form\LegacyRedirectSettingsForm'
+    _title: 'Configure Legacy Redirect'
+  requirements:
+    _permission: 'administer site configuration'

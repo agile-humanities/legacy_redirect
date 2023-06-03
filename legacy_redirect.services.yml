@@ -1,0 +1,5 @@
+services:
+  http_middleware.legacy_redirect_redirect:
+    class: Drupal\legacy_redirect\Middleware\Redirect
+    tags:
+      - { name: http_middleware }

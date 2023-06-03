@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * @file
+ * Contains legacy_redirect.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function legacy_redirect_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the legacy_redirect module.
+    case 'help.page.legacy_redirect':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Agile Customizations') . '</p>';
+      return $output;
+
+    default:
+  }
+}

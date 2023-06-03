@@ -1,0 +1,5 @@
+system.legacy_redirect.settings:
+  title: 'Legacy Redirect Settings'
+  parent: system.admin_config_islandora
+  route_name: system.legacy_redirect.settings
+  description: 'Configure Legacy Redirect settings'
