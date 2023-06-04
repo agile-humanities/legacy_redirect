@@ -1,0 +1,3 @@
+pid_reference: 'field_pid'
+redirect_message: 'You have arrived here using a URL from our old site. Please update your bookmarks.'
+not_found: '/'
