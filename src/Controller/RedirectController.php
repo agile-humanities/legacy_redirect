@@ -69,7 +69,7 @@ class RedirectController extends ControllerBase {
       }
     }
     $this->messenger->addMessage($message);
-    $response = new RedirectResponse($destination, 302);
+    $response = new RedirectResponse($destination, 301);
     \Drupal::service('http_middleware.legacy_redirect_redirect')->setRedirectResponse($response);
     return;
   }
