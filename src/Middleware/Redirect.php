@@ -14,12 +14,12 @@ class Redirect implements HttpKernelInterface {
     $this->httpKernel = $http_kernel;
   }
 
-  public function handle(Request $request, $type = self::MASTER_REQUEST, $catch = TRUE) {
+  public function handle(Request $request, $type = HttpKernelInterface::MAIN_REQUEST, $catch = TRUE): Response {
     $response = $this->httpKernel->handle($request, $type, $catch);
     return $this->redirectResponse ?: $response;
   }
 
-  public function setRedirectResponse(RedirectResponse $redirectResponse) {
+  public function setRedirectResponse(?RedirectResponse $redirectResponse) {
     $this->redirectResponse = $redirectResponse;
   }
 
