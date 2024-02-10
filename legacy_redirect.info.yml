@@ -2,7 +2,7 @@ name: 'Islandora Legacy Redirect'
 type: module
 description: 'Allows assets from legacy Islandora sites to be discovered on Islandora 2 site'
 core: 8.x
-core_version_requirement: ^8 || ^9
+core_version_requirement: ^8 || ^9 || ^10
 package: 'Agile'
 dependencies:
   - islandora

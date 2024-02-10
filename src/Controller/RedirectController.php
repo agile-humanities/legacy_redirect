@@ -5,6 +5,7 @@ namespace Drupal\legacy_redirect\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class RedirectController.
@@ -43,7 +44,7 @@ class RedirectController extends ControllerBase {
   }
 
   /**
-   * @return void
+   * @return \Symfony\Component\HttpFoundation\Response
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
@@ -51,7 +52,7 @@ class RedirectController extends ControllerBase {
     $config = $this->config(static::SETTINGS);
     $pid_field = $config->get('pid_reference');
     $destination = $config->get('not_found') ? $config->get('not_found') : '/';
-    $uri = $this->requestStack->getMasterRequest()->getRequestUri();
+    $uri = $this->requestStack->getMainRequest()->getRequestUri();
     $message = $this->t("The page you were looking for: $uri does not exist on this site");
 
     if (strpos($uri, "islandora/object/") !== false) {
@@ -69,8 +70,11 @@ class RedirectController extends ControllerBase {
       }
     }
     $this->messenger->addMessage($message);
-    $response = new RedirectResponse($destination, 302);
+    $response = new RedirectResponse($destination, 301);
     \Drupal::service('http_middleware.legacy_redirect_redirect')->setRedirectResponse($response);
-    return;
+    return new Response(
+      'Redirect complete',
+      Response::HTTP_OK
+    );
   }
 }

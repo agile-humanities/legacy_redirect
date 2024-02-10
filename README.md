@@ -5,7 +5,7 @@ This module redirects URLs from Islandora 7 to Islandora 2, assuming the site na
 ie `example.com/islandora/object/islandora:100` will resolve to  `example.com/node/17`, if
 the node with a nid of 17 contains a reference field with the value of islandora:100
 
-The module will redirect, and return a status of 302 to alert web crawlers the address has changed.
+The module will redirect, and return a status of 301 to alert web crawlers the address has changed.
 Users will be shown a message telling them to update bookmarks.
 
 Site admins can configure the reference field, the message to be shown on redirect, as well a redirect on 404s.
