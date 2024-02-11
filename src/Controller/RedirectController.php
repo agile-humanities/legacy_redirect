@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Class RedirectController.
+ * Redirects URLS from legacy Islandora sites.
  */
 class RedirectController extends ControllerBase {
 
@@ -27,6 +27,13 @@ class RedirectController extends ControllerBase {
   protected $messenger;
 
   /**
+   * Drupal\legacy_redirect\Middleware\Redirect.
+   *
+   * @var Drupal\legacy_redirect\Middleware\
+   */
+  protected $legacyRedirect;
+
+  /**
    * Config settings.
    *
    * @var string
@@ -40,11 +47,16 @@ class RedirectController extends ControllerBase {
     $instance = parent::create($container);
     $instance->requestStack = $container->get('request_stack');
     $instance->messenger = $container->get('messenger');
+    $instance->legacyRedirect = $container->get('http_middleware.legacy_redirect_redirect');
     return $instance;
   }
 
   /**
+   * Filters and parses incoming 404s.
+   *
    * @return \Symfony\Component\HttpFoundation\Response
+   *   Unused Response object required by parent class.
+   *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
@@ -53,13 +65,13 @@ class RedirectController extends ControllerBase {
     $pid_field = $config->get('pid_reference');
     $destination = $config->get('not_found') ? $config->get('not_found') : '/';
     $uri = $this->requestStack->getMainRequest()->getRequestUri();
-    $message = $this->t("The page you were looking for: $uri does not exist on this site");
+    $message = $this->t("The page you were looking for: @uri does not exist on this site", ['@uri' => $uri]);
 
-    if (strpos($uri, "islandora/object/") !== false) {
+    if (strpos($uri, "islandora/object/") !== FALSE) {
       $parts = \explode("islandora/object/", $uri);
       if (count($parts) > 0) {
         $pid = $parts[1];
-        $nodes = \Drupal::entityTypeManager()
+        $nodes = $this->entityTypeManager()
           ->getStorage('node')
           ->loadByProperties([$pid_field => $pid]);
         if ($nodes) {
@@ -71,10 +83,11 @@ class RedirectController extends ControllerBase {
     }
     $this->messenger->addMessage($message);
     $response = new RedirectResponse($destination, 301);
-    \Drupal::service('http_middleware.legacy_redirect_redirect')->setRedirectResponse($response);
+    $this->legacyRedirect->setRedirectResponse($response);
     return new Response(
       'Redirect complete',
       Response::HTTP_OK
     );
   }
+
 }
