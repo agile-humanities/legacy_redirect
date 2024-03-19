@@ -27,9 +27,9 @@ class RedirectController extends ControllerBase {
   protected $messenger;
 
   /**
-   * Drupal\legacy_redirect\Middleware\Redirect.
+   * Redirect from middleware.
    *
-   * @var Drupal\legacy_redirect\Middleware\
+   * @var \Drupal\legacy_redirect\Middleware\Redirect
    */
   protected $legacyRedirect;
 
@@ -41,6 +41,20 @@ class RedirectController extends ControllerBase {
   const SETTINGS = 'legacy_redirect.settings';
 
   /**
+   * Media source service.
+   *
+   * @var \Drupal\islandora\MediaSource\MediaSourceService
+   */
+  protected $mediaSourceService;
+
+  /**
+   * Islandora Utils.
+   *
+   * @var \Drupal\islandora\IslandoraUtils
+   */
+  protected $utils;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
@@ -48,6 +62,8 @@ class RedirectController extends ControllerBase {
     $instance->requestStack = $container->get('request_stack');
     $instance->messenger = $container->get('messenger');
     $instance->legacyRedirect = $container->get('http_middleware.legacy_redirect_redirect');
+    $instance->mediaSourceService = $container->get('islandora.media_source_service');
+    $instance->utils = $container->get('islandora.utils');
     return $instance;
   }
 
@@ -62,22 +78,53 @@ class RedirectController extends ControllerBase {
    */
   public function legacyRedirect() {
     $config = $this->config(static::SETTINGS);
+    $original_file_term = $this->utils->getTermForUri('http://pcdm.org/use#OriginalFile');
+
+    $file_type_map = [
+      'document' => 'field_media_document',
+      'file' => 'field_media_file',
+      'audio' => 'field_media_audio_file',
+      'image' => 'field_media_image',
+      'video' => 'field_media_video_file',
+    ];
+
     $pid_field = $config->get('pid_reference');
     $destination = $config->get('not_found') ? $config->get('not_found') : '/';
     $uri = $this->requestStack->getMainRequest()->getRequestUri();
+
+    $uri = rtrim($uri, '/');
     $message = $this->t("The page you were looking for: @uri does not exist on this site", ['@uri' => $uri]);
 
-    if (strpos($uri, "islandora/object/") !== FALSE) {
+    if (str_contains($uri, "islandora/object/")) {
       $parts = \explode("islandora/object/", $uri);
       if (count($parts) > 0) {
-        $pid = $parts[1];
+        $target = 'node';
+        $components = explode('/', $parts[1]);
+        if (count($components) > 1 && $components[1] == 'datastream') {
+          $target = 'download';
+        }
+        $pid = $components[0];
         $nodes = $this->entityTypeManager()
           ->getStorage('node')
           ->loadByProperties([$pid_field => $pid]);
         if ($nodes) {
           $node = \reset($nodes);
-          $destination = "/node/{$node->id()}";
-          $message = $config->get('redirect_message');
+          if ($target == 'node') {
+            $destination = "/node/{$node->id()}";
+            $message = $config->get('redirect_message');
+          }
+          if ($target == 'download') {
+            $media = $this->utils->getMediaWithTerm($node, $original_file_term);
+            $bundle = $media->bundle();
+            $field = $file_type_map[$bundle];
+            $document_field = $media->get($field);
+            $document_values = $document_field->getValue();
+            if (!empty($document_values)) {
+              $fid = $document_values[0]['target_id'];
+              $file = $this->entityTypeManager->getStorage('file')->load($fid);
+              $destination = $this->utils->getDownloadUrl($file);
+            }
+          }
         }
       }
     }
